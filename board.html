@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div></div>
+    <form action="main">
+        <button type="submit">next</button>
+    </form>
+    <script>
+        let div = document.querySelector('div');
+
+        let data = JSON.parse(sessionStorage.getItem("users"));
+        
+        let table = document.createElement('table');
+        let tr = document.createElement('tr');
+        let tdname = document.createElement('td');
+        let tdscore = document.createElement('td');
+        tr.appendChild(tdname);
+        tr.appendChild(tdscore);
+        table.appendChild(tr);
+        tdname.innerText = 'name';
+        tdscore.innerText = 'score';
+        for(let i = 0; i < data.length; i++){
+            let tr = document.createElement('tr');
+            let tdname = document.createElement('td');
+            let tdscore = document.createElement('td');
+            tr.appendChild(tdname);
+            tr.appendChild(tdscore);
+            tdname.innerText = data[i].nickname;           
+            tdscore.innerText = data[i].poits;
+            
+            table.appendChild(tr);
+        }
+        document.body.appendChild(table)
+    </script>
+</body>
+</html>

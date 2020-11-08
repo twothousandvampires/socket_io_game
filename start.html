@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <title>Document</title>
+</head>
+<body>    
+
+        <input id='name' type="text" name = 'nickname'>
+        <input id='color' type="color" name = 'color'>
+        <button id='go' type="submit">go</button>
+    
+    <script>
+
+        let nick = $('#name').val();
+        sessionStorage.setItem('playerData',JSON.stringify(nick));
+        $('#go').click(function(){
+            let color = $('#color').val();
+            let nik = $('#name').val();
+            let data = {
+                nik : nik,
+                color : color
+            }
+            sessionStorage.setItem('playerData', JSON.stringify(data));
+            $(location).attr('href', 'main');
+        })
+
+    </script>
+</body>
+</html>

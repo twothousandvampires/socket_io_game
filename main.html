@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>chat</title>
+    <link rel="stylesheet" href="style.css" type="text">
+</head>
+<body style='display: flex;flex-direction: row;justify-content: center;align-items: center;width: vw;height: 100vh;max-height: 100 vh;'>  
+    <div id="chatwrap" style="position: absolute;max-height: 200px; overflow: auto;left: 20px;top :20px">
+        <input type="text" id='chatInput'>
+        <button id='addMess'>Submit</button>
+        <div id='chat'></div>
+    </div>
+    <canvas id='canvas' width="1000px" height="1000px"></canvas>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        $(document).ready(function(){
+            var socket = io.connect();
+            //alert("!");
+            let playerImage = document.createElement('img')
+            playerImage.src = 'https://cdn1.savepice.ru/uploads/2020/10/18/b32a9fe450e12781da4ed9e831bc0b82-full.png';
+            let wallsImage = document.createElement('img');
+            wallsImage.src = 'https://cdn1.savepice.ru/uploads/2020/10/18/fef9f04eab4421d55418e3affaaf8b62-full.png';
+        
+            
+
+            var mouseOver = false;
+
+            var cnv = document.getElementById('canvas')
+            var ctx = cnv.getContext("2d");
+
+            cnv.addEventListener('mouseover', (e)=>{
+                mouseOver = true;
+            })
+            cnv.addEventListener('mouseout', (e)=>{
+                mouseOver = false;
+            })
+            
+            
+
+            socket.on('connect',() => {
+            
+                let data = JSON.parse(sessionStorage.getItem("playerData"));
+                
+                socket.emit('playerReady', {
+                    data
+                })
+            })
+            
+
+            socket.on('loadScoreBoard', (data) => {
+                let users = data.data.users;
+                sessionStorage.setItem('users', JSON.stringify(users));
+                $(location).attr('href', 'board');
+            })
+        
+            document.body.addEventListener('keydown', function (e){
+                if(e.keyCode === 13){
+                    if($('#chatInput').val() != ''){
+                    socket.emit('addMessage', {
+                    id: socket.id,
+                    value: $('#chatInput').val()
+                    })
+                    $('#chatInput').val('');
+                    }
+                }
+            })
+            $('#addMess').click(function (e) {
+                if($('#chatInput').val() != ''){
+                    socket.emit('addMessage', {
+                    id: socket.id,
+                    value: $('#chatInput').val()
+                })
+                $('#chatInput').val('');
+                }
+            })
+
+            var arrow = {
+                65: "left",
+                68: "right",
+                87: "up",
+                83: "down",
+                69: "e",
+                81: "q"
+            }
+            var keys = new trackKeys(arrow);
+            function trackKeys(keys) {
+                var pressed = Object.create(null);
+
+                function handler(event) {
+                    if (keys.hasOwnProperty(event.keyCode)) {
+                        var down = event.type == "keydown";
+                        pressed[keys[event.keyCode]] = down;
+                        pressed[keys[event.keyCode]] = (mouseOver) ? pressed[keys[event.keyCode]] : false
+                        if(mouseOver){
+                            event.preventDefault()
+                        }                      
+                    }
+                }
+
+                function handlerMouse(event) {
+                    var down = event.type == 'mousedown';
+                    if(mouseOver){
+                        pressed['click'] = down;
+                    }
+                    
+                }
+                addEventListener('keydown', handler)
+                addEventListener('keyup', handler)
+                addEventListener('mousedown', handlerMouse)
+                addEventListener('mouseup', handlerMouse)
+                return pressed;
+            }
+
+            setInterval(() => {
+                socket.emit('getInfoFromPlayer', {
+                    id: socket.id,
+                    keys: keys
+                })
+            }, 1000 / 60)
+
+            socket.on('draw', (data) => {
+                if (data) {
+                    q(draw(data));
+                }
+            })
+
+            socket.on('updateChat', (data) => {
+                if(data.nik){
+                    $('#chat').prepend('<div><span style=\'color:'+data.color+';font-size:1.5rem\'>' +data.nik+' : </span>' + data.data + '</div>')
+                }
+                else{
+                    $('#chat').prepend('<div>' + data.data + '</div>')
+                }                
+            })
+            socket.on('createCanvas', (data) => {
+    
+                cnv.width = data.data.width 
+                cnv.height = data.data.height
+            })
+           
+            function q(func) {
+                if (func) {
+                    requestAnimationFrame(q)
+                }
+            }
+
+            function draw(data) {
+                if (!data) {
+                    return false
+                }
+                ctx.clearRect(0, 0, 1000, 1000)
+                data.data.massWalls.forEach(elem =>{
+                    ctx.drawImage(wallsImage, 0, 0, 64, 64, elem.pos.x, elem.pos.y, 100, 100)
+                })
+                data.data.users = data.data.users.sort((a,b) => { return a.pos.y - b.pos.y})
+              
+                data.data.users.forEach((element) => {
+                    ctx.save();
+                    if(element.fliped){
+                        flipHorizontally(ctx, element.pos.x +20)
+                        ctx.drawImage(playerImage, element.animCount * 120, 0, 120, 96, element.pos.x-45, element.pos.y-77, 120, 96)
+                        ctx.fillStyle = 'black';
+                        ctx.strokeRect(element.pos.x, element.pos.y, element.size.x ,element.size.y) 
+                    }
+                    else{
+                        ctx.drawImage(playerImage, element.animCount * 120, 0, 120, 96, element.pos.x-45, element.pos.y-77, 120, 96)
+                        ctx.fillStyle = 'black';
+                        ctx.strokeRect(element.pos.x, element.pos.y, element.size.x ,element.size.y) 
+                    }
+                    ctx.restore();
+                });
+                              
+            }
+            function flipHorizontally(context, around){
+                context.translate(around , 0);
+                context.scale(-1, 1);
+                context.translate(-around, 0)
+            }          
+        })
+            
+    </script>
+</body>
+
+</html>
