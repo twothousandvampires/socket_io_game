@@ -47,7 +47,7 @@
                 let data = JSON.parse(sessionStorage.getItem("playerData"));
                 
                 socket.emit('playerReady', {
-                    data
+                    data : data
                 })
             })
             
