@@ -108,7 +108,8 @@ io.sockets.on('connection', (socket) => {
 
     socket.on('playerReady',(data) => {
         if(level.users.length < 20){
-            if(data != null){
+            if(data){
+                console.log(data)
                 io.sockets.emit('updateChat' , { data : 'игрок ' + data.data.nik + ' присоединился'})
                 let randomSpot = level.massSpots[Math.floor(Math.random() * level.massSpots.length)];
                 let newUser = new Player(socket.id,  randomSpot.pos.x + 50, randomSpot.pos.y + 50, data.data.nik,data.data.color)
