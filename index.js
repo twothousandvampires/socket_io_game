@@ -2,7 +2,7 @@
   const fs = require('fs');
   const path = require('path');
   
-  const hostname = 'powerful-shore-55622.herokuapp.com';
+  const hostname = 'https://powerful-shore-55622.herokuapp.com/';
   const port = 80;
   
   const server = http.createServer((req, res)=>{
