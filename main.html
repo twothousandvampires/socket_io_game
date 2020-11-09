@@ -45,10 +45,12 @@
             socket.on('connect',() => {
             
                 let data = JSON.parse(sessionStorage.getItem("playerData"));
-                console.log(data);
-                socket.emit('playerReady', {            
+                if(data){
+                    socket.emit('playerReady', {            
                     data : data
                 })
+                }
+                
             })
             
             socket.on('loadScoreBoard', (data) => {
