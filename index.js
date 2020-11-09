@@ -131,6 +131,9 @@ io.sockets.on('connection', (socket) => {
     })
     
     setInterval(()=>{  
+        level.massActors.forEach(element => {
+            element.act();
+        });
         if(!checkWinner()){
             io.sockets.emit("draw", {data : level});
         }
@@ -155,6 +158,36 @@ function checkWinner(){
     else{
         return false;
     }
+}
+
+function Actor(name, type, x, y, sizeX, sizeY, vecror, owner){
+    this.name = name;
+    this.type = type;
+    this.pos = new Vector(x, y);
+    this.size = new Vector(sizeX, sizeY);
+    this.speed = 1;
+    this.moveSpeed = vecror;
+    this.owner = owner;
+}
+
+Actor.prototype.act = function(){
+    this.pos = this.pos.plus(this.moveSpeed);
+    if(collisionGrid(this.pos,this.size)){
+        level.massActors  = level.massActors.filter(elem=>{
+            return elem != this
+        })
+    }
+    if(collision(this, this.owner)){
+        var enemy = collision(this, this.owner);
+        console.log(enemy)
+        enemy.forEach((elem) => {
+            elem.takeDamage(this);
+        })
+    }
+}
+
+Actor.prototype.getDamage = function(){
+    return 100;
 }
 
 function Player(id, x, y, nik, color){
@@ -183,9 +216,26 @@ function Player(id, x, y, nik, color){
     this.tryToBlock = false;    // игрок пробовал блокировать
     this.blocked = false;       // игрок блокировал
     this.defends = false;
-    this.chanceToBlock = 0.7;    // игрок защищается
+    this.chanceToBlock = 0.7;
+    this.castDelay = 5;
+    this.casted = false;    // игрок защищается
 }
 Player.prototype.act = function(data){
+    if(data.keys.q && data.keys.click && !this.casted){
+        this.casted = true;
+        setTimeout(()=>{
+            this.casted = false
+        }, this.castDelay * 1000)
+        var vectX = this.pos.x - data.keys.mouseX + data.x;
+        var vectY = this.pos.y - data.keys.mouseY + data.y;
+
+        var angle = Math.atan2(vectY, vectX);
+
+        let vector = new Vector(-Math.cos(angle), -Math.sin(angle));
+        console.log(angle);
+
+        level.massActors.push(new Actor('firebolt','firebolt', this.pos.x, this.pos.y,36,36, vector, this));
+    }
     if(data.keys.e && !this.damaged && !this.attacks){
         this.defends = true;
         this.animCount = 16;  
