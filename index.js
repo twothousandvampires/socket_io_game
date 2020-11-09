@@ -2,8 +2,8 @@
   const fs = require('fs');
   const path = require('path');
   
-  const hostname = 'https://powerful-shore-55622.herokuapp.com/';
-  const port = 80;
+  
+  const PORT = process.env.PORT || 80;
   
   const server = http.createServer((req, res)=>{
   
@@ -46,7 +46,7 @@
       }
   })
   
-  server.listen(port, hostname, ()=>{
+  server.listen(PORT, ()=>{
       console.log("listening");
   })
   
