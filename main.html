@@ -45,7 +45,7 @@
             socket.on('connect',() => {
             
                 let data = JSON.parse(sessionStorage.getItem("playerData"));
-                
+                console.log(data);
                 socket.emit('playerReady', {
                     data : data
                 })
