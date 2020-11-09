@@ -1,56 +1,42 @@
-  const http = require('http');
-  const fs = require('fs');
-  const path = require('path');
+const http = require('http');
+const fs = require('fs');
+const path = require('path');
   
   
-  const PORT = process.env.PORT || 80;
+const PORT = process.env.PORT || 80;
   
-  const server = http.createServer((req, res)=>{
-  
-      if(req.url === '/'){
-  
-          
-  
-          fs.readFile('./start.html','UTF-8', (err, html)=>{
-  
+const server = http.createServer((req, res)=>{ 
+    
+    if(req.url === '/'){         
+        fs.readFile('./start.html','UTF-8', (err, html)=>{ 
               res.statusCode = 200;
               res.setHeader('Content-Type', 'text/html');
               res.end(html);
-          });
-      }
+        });
+    }
       
-      if(req.url === '/board'){
-  
-          
-  
+    if(req.url === '/board'){
         fs.readFile('./board.html','UTF-8', (err, html)=>{
-
             res.statusCode = 200;
             res.setHeader('Content-Type', 'text/html');
             res.end(html);
         });
     }
-      if(req.url === '/main'){
-          
-        
-        
-        
-          
-  
-          fs.readFile('./main.html','UTF-8', (err, html)=>{
-  
+
+    if(req.url === '/main'){          
+        fs.readFile('./main.html','UTF-8', (err, html)=>{ 
               res.statusCode = 200;
               res.setHeader('Content-Type', 'text/html');
               res.end(html);
-          });
+        });
       }
   })
-  
-  server.listen(PORT, ()=>{
+server.listen(PORT, ()=>{
       console.log("listening");
-  })
+})
   
-  var io = require('socket.io').listen(server)
+var io = require('socket.io').listen(server);
+
 let gameIsStarted = true;
 
 

@@ -18,15 +18,13 @@
     <script src="/socket.io/socket.io.js"></script>
     <script>
         $(document).ready(function(){
+            
             var socket = io.connect();
-            //alert("!");
             let playerImage = document.createElement('img')
             playerImage.src = 'https://cdn1.savepice.ru/uploads/2020/10/18/b32a9fe450e12781da4ed9e831bc0b82-full.png';
             let wallsImage = document.createElement('img');
             wallsImage.src = 'https://cdn1.savepice.ru/uploads/2020/10/18/fef9f04eab4421d55418e3affaaf8b62-full.png';
         
-            
-
             var mouseOver = false;
 
             var cnv = document.getElementById('canvas')
@@ -38,9 +36,7 @@
             cnv.addEventListener('mouseout', (e)=>{
                 mouseOver = false;
             })
-            
-            
-
+                        
             socket.on('connect',() => {
             
                 let data = JSON.parse(sessionStorage.getItem("playerData"));
@@ -50,7 +46,6 @@
                 })
             })
             
-
             socket.on('loadScoreBoard', (data) => {
                 let users = data.data.users;
                 sessionStorage.setItem('users', JSON.stringify(users));
@@ -86,7 +81,9 @@
                 69: "e",
                 81: "q"
             }
+
             var keys = new trackKeys(arrow);
+
             function trackKeys(keys) {
                 var pressed = Object.create(null);
 
@@ -105,6 +102,9 @@
                     var down = event.type == 'mousedown';
                     if(mouseOver){
                         pressed['click'] = down;
+                        pressed['mouseX'] = event.pageX;
+                        pressed['mouseY'] = event.pageX;
+                        pressed['shift'] = event.shiftKey;
                     }
                     
                 }
@@ -120,6 +120,7 @@
                     id: socket.id,
                     keys: keys
                 })
+                console.log(keys);
             }, 1000 / 60)
 
             socket.on('draw', (data) => {
