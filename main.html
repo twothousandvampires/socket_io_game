@@ -7,7 +7,9 @@
     <title>chat</title>
     <link rel="stylesheet" href="style.css" type="text">
 </head>
-<body style='display: flex;flex-direction: row;justify-content: center;align-items: center;width: vw;height: 100vh;max-height: 100 vh;'>  
+
+<body
+    style='display: flex;flex-direction: row;justify-content: center;align-items: center;width: vw;height: 100vh;max-height: 100 vh;'>
     <div id="chatwrap" style="position: absolute;max-height: 200px; overflow: auto;left: 20px;top :20px">
         <input type="text" id='chatInput'>
         <button id='addMess'>Submit</button>
@@ -17,17 +19,20 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script>
-        $(document).ready(function(){
-            
+        $(document).ready(function () {
+
             var socket = io.connect();
             let playerImage = document.createElement('img')
-            playerImage.src = 'https://cdn1.savepice.ru/uploads/2020/10/18/b32a9fe450e12781da4ed9e831bc0b82-full.png';
+            playerImage.src =
+                'https://cdn1.savepice.ru/uploads/2020/10/18/b32a9fe450e12781da4ed9e831bc0b82-full.png';
 
             let wallsImage = document.createElement('img');
-            wallsImage.src = 'https://cdn1.savepice.ru/uploads/2020/10/18/fef9f04eab4421d55418e3affaaf8b62-full.png';
+            wallsImage.src =
+                'https://cdn1.savepice.ru/uploads/2020/10/18/fef9f04eab4421d55418e3affaaf8b62-full.png';
 
             let projImage = document.createElement('img');
-            projImage.src = 'https://cdn1.savepice.ru/uploads/2020/11/9/218ae2dabf954a7155a06b1a599f08d5-full.png';
+            projImage.src =
+                'https://cdn1.savepice.ru/uploads/2020/11/9/218ae2dabf954a7155a06b1a599f08d5-full.png';
 
             var mouseOver = false;
             var x;
@@ -35,48 +40,48 @@
             var cnv = document.getElementById('canvas')
             var ctx = cnv.getContext("2d");
 
-            cnv.addEventListener('mouseover', (e)=>{
+            cnv.addEventListener('mouseover', (e) => {
                 mouseOver = true;
             })
-            cnv.addEventListener('mouseout', (e)=>{
+            cnv.addEventListener('mouseout', (e) => {
                 mouseOver = false;
             })
-                        
-            socket.on('connect',() => {
-            
+
+            socket.on('connect', () => {
+
                 let data = JSON.parse(sessionStorage.getItem("playerData"));
-                if(data){
-                    socket.emit('playerReady', {            
-                    data : data
-                })
+                if (data) {
+                    socket.emit('playerReady', {
+                        data: data
+                    })
                 }
-                
+
             })
-            
+
             socket.on('loadScoreBoard', (data) => {
                 let users = data.data.users;
                 sessionStorage.setItem('users', JSON.stringify(users));
                 $(location).attr('href', 'board');
             })
-        
-            document.body.addEventListener('keydown', function (e){
-                if(e.keyCode === 13){
-                    if($('#chatInput').val() != ''){
-                    socket.emit('addMessage', {
-                    id: socket.id,
-                    value: $('#chatInput').val()
-                    })
-                    $('#chatInput').val('');
+
+            document.body.addEventListener('keydown', function (e) {
+                if (e.keyCode === 13) {
+                    if ($('#chatInput').val() != '') {
+                        socket.emit('addMessage', {
+                            id: socket.id,
+                            value: $('#chatInput').val()
+                        })
+                        $('#chatInput').val('');
                     }
                 }
             })
             $('#addMess').click(function (e) {
-                if($('#chatInput').val() != ''){
+                if ($('#chatInput').val() != '') {
                     socket.emit('addMessage', {
-                    id: socket.id,
-                    value: $('#chatInput').val()
-                })
-                $('#chatInput').val('');
+                        id: socket.id,
+                        value: $('#chatInput').val()
+                    })
+                    $('#chatInput').val('');
                 }
             })
 
@@ -99,20 +104,20 @@
                         var down = event.type == "keydown";
                         pressed[keys[event.keyCode]] = down;
                         pressed[keys[event.keyCode]] = (mouseOver) ? pressed[keys[event.keyCode]] : false
-                        if(mouseOver){
+                        if (mouseOver) {
                             event.preventDefault()
-                        }                      
+                        }
                     }
                 }
 
                 function handlerMouse(event) {
                     var down = event.type == 'mousedown';
-                    if(mouseOver){
+                    if (mouseOver) {
                         pressed['click'] = down;
                         pressed['mouseX'] = event.pageX;
-                        pressed['mouseY'] = event.pageY;                      
+                        pressed['mouseY'] = event.pageY;
                     }
-                    
+
                 }
                 addEventListener('keydown', handler)
                 addEventListener('keyup', handler)
@@ -121,16 +126,14 @@
                 return pressed;
             }
 
-            setInterval(() => {
+            socket.on('callInfo', () => {
                 socket.emit('getInfoFromPlayer', {
                     id: socket.id,
                     keys: keys,
-                    x : x,
-                    y : y
+                    x: x,
+                    y: y
                 })
-               // console.log(keys);
-            }, 1000 / 60)
-
+            })
             socket.on('draw', (data) => {
                 if (data) {
                     q(draw(data));
@@ -138,20 +141,20 @@
             })
 
             socket.on('updateChat', (data) => {
-                if(data.nik){
-                    $('#chat').prepend('<div><span style=\'color:'+data.color+';font-size:1.5rem\'>' +data.nik+' : </span>' + data.data + '</div>')
-                }
-                else{
+                if (data.nik) {
+                    $('#chat').prepend('<div><span style=\'color:' + data.color +
+                        ';font-size:1.5rem\'>' + data.nik + ' : </span>' + data.data + '</div>')
+                } else {
                     $('#chat').prepend('<div>' + data.data + '</div>')
-                }                
+                }
             })
             socket.on('createCanvas', (data) => {
                 x = cnv.getBoundingClientRect().x;
                 y = cnv.getBoundingClientRect().y;
-                cnv.width = data.data.width 
+                cnv.width = data.data.width
                 cnv.height = data.data.height
             })
-           
+
             function q(func) {
                 if (func) {
                     requestAnimationFrame(q)
@@ -163,42 +166,45 @@
                     return false
                 }
                 ctx.clearRect(0, 0, 1000, 1000)
-                data.data.massWalls.forEach(elem =>{
+                data.data.massWalls.forEach(elem => {
                     ctx.drawImage(wallsImage, 0, 0, 64, 64, elem.pos.x, elem.pos.y, 100, 100)
                 })
-                data.data.users = data.data.users.sort((a,b) => { return a.pos.y - b.pos.y})
-              
+                data.data.users = data.data.users.sort((a, b) => {
+                    return a.pos.y - b.pos.y
+                })
+
                 data.data.users.forEach((element) => {
                     ctx.save();
-                    if(element.fliped){
-                        flipHorizontally(ctx, element.pos.x +20)
-                        ctx.drawImage(playerImage, element.animCount * 120, 0, 120, 96, element.pos.x-45, element.pos.y-77, 120, 96)
+                    if (element.fliped) {
+                        flipHorizontally(ctx, element.pos.x + 20)
+                        ctx.drawImage(playerImage, element.animCount * 120, 0, 120, 96, element.pos.x -
+                            45, element.pos.y - 77, 120, 96)
                         ctx.fillStyle = 'black';
-                        ctx.strokeRect(element.pos.x, element.pos.y, element.size.x ,element.size.y) 
-                    }
-                    else{
-                        ctx.drawImage(playerImage, element.animCount * 120, 0, 120, 96, element.pos.x-45, element.pos.y-77, 120, 96)
+                        ctx.strokeRect(element.pos.x, element.pos.y, element.size.x, element.size.y)
+                    } else {
+                        ctx.drawImage(playerImage, element.animCount * 120, 0, 120, 96, element.pos.x -
+                            45, element.pos.y - 77, 120, 96)
                         ctx.fillStyle = 'black';
-                        ctx.strokeRect(element.pos.x, element.pos.y, element.size.x ,element.size.y) 
+                        ctx.strokeRect(element.pos.x, element.pos.y, element.size.x, element.size.y)
                     }
                     ctx.restore();
                 });
                 data.data.massActors.forEach((element) => {
                     ctx.save();
-                    if(element.type = 'firebolt'){
-                        ctx.drawImage(projImage,0,0,36,36,element.pos.x, element.pos.y, 36,36);
+                    if (element.type = 'firebolt') {
+                        ctx.drawImage(projImage, 0, 0, 36, 36, element.pos.x, element.pos.y, 36, 36);
                     }
                     ctx.restore();
                 })
-                              
+
             }
-            function flipHorizontally(context, around){
-                context.translate(around , 0);
+
+            function flipHorizontally(context, around) {
+                context.translate(around, 0);
                 context.scale(-1, 1);
                 context.translate(-around, 0)
-            }          
+            }
         })
-            
     </script>
 </body>
 
