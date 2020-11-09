@@ -107,14 +107,19 @@ io.sockets.on('connection', (socket) => {
     })
 
     socket.on('playerReady',(data) => {
-        console.log(data);
         if(level.users.length < 20){
             if(data){
                 io.sockets.emit('updateChat' , { data : 'игрок ' + data.data.nik + ' присоединился'})
+                let randomSpot = level.massSpots[Math.floor(Math.random() * level.massSpots.length)];
+                let newUser = new Player(socket.id,  randomSpot.pos.x + 50, randomSpot.pos.y + 50, data.data.nik,data.data.color)
+                level.users.push(newUser)
             }           
-            let randomSpot = level.massSpots[Math.floor(Math.random() * level.massSpots.length)];
-            let newUser = new Player(socket.id,  randomSpot.pos.x + 50, randomSpot.pos.y + 50, data.data.nik,data.data.color)
-            level.users.push(newUser)
+            else{
+                io.sockets.emit('updateChat' , { data : 'неизвестный игрок присоединился'})
+                let randomSpot = level.massSpots[Math.floor(Math.random() * level.massSpots.length)];
+                let newUser = new Player(socket.id,  randomSpot.pos.x + 50, randomSpot.pos.y + 50, 'незнакомец',"#000000")
+                level.users.push(newUser)
+            }
         }
         
     })
